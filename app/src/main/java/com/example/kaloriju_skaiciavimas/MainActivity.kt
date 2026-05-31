@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var greetingText: TextView
@@ -48,16 +49,19 @@ class MainActivity : AppCompatActivity() {
     private fun updateDashboard() {
         val user = AppStorage.getUser(this)
         val goal = AppStorage.getCalorieGoal(this)
-        val consumed = AppStorage.getFoodEntries(this).sumOf { it.calories }
+        val consumed = AppStorage.getFoodEntries(this).sumOf { it.calculatedCalories }
         val remaining = goal - consumed
 
         greetingText.text = "Sveiki, ${user?.name?.ifBlank { "naudotojau" } ?: "naudotojau"}"
         goalText.text = "Dienos tikslas: $goal kcal"
-        consumedText.text = "Suvartota: $consumed kcal"
+        consumedText.text = "Suvartota: ${formatNumber(consumed)} kcal"
         remainingText.text = if (remaining >= 0) {
-            "Liko: $remaining kcal"
+            "Liko: ${formatNumber(remaining)} kcal"
         } else {
-            "Viršyta: ${-remaining} kcal"
+            "Viršyta: ${formatNumber(-remaining)} kcal"
         }
     }
+
+    private fun formatNumber(value: Double): String =
+        if (value % 1.0 == 0.0) value.toInt().toString() else String.format(Locale.getDefault(), "%.1f", value)
 }

@@ -9,7 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingStart="24dp"
+        android:paddingTop="48dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="24dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -19,13 +22,13 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/foodNameInput"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="28dp"
             android:background="@drawable/input_background"
-            android:hint="Produkto pavadinimas"
+            android:hint="Produkto pavadinimas arba pasirinkimas"
             android:inputType="textCapSentences" />
 
         <EditText
@@ -34,8 +37,8 @@
             android:layout_height="56dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/input_background"
-            android:hint="Kalorijos"
-            android:inputType="number" />
+            android:hint="Kalorijos 100 g"
+            android:inputType="numberDecimal" />
 
         <EditText
             android:id="@+id/amountInput"
@@ -43,8 +46,20 @@
             android:layout_height="56dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/input_background"
-            android:hint="Kiekis arba porcija"
-            android:inputType="text" />
+            android:hint="Kiekis gramais"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:id="@+id/calculatedCaloriesText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/panel_background"
+            android:padding="16dp"
+            android:text="Apskaičiuotos kalorijos: 0 kcal"
+            android:textColor="@color/app_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/saveFoodButton"

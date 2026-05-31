@@ -6,6 +6,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import java.util.Locale
 
 class SummaryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,10 +28,10 @@ class SummaryActivity : AppCompatActivity() {
 
     private fun renderSummary() {
         val entries = AppStorage.getFoodEntries(this)
-        val total = entries.sumOf { it.calories }
+        val total = entries.sumOf { it.calculatedCalories }
         val entriesContainer = findViewById<LinearLayout>(R.id.entriesContainer)
 
-        findViewById<TextView>(R.id.totalCaloriesText).text = "Iš viso: $total kcal"
+        findViewById<TextView>(R.id.totalCaloriesText).text = "Iš viso: ${formatNumber(total)} kcal"
         entriesContainer.removeAllViews()
 
         if (entries.isEmpty()) {
@@ -40,7 +41,9 @@ class SummaryActivity : AppCompatActivity() {
 
         entries.forEach { entry ->
             entriesContainer.addView(
-                createEntryText("${entry.name} • ${entry.amount} • ${entry.calories} kcal")
+                createEntryText(
+                    "${entry.name} • ${formatNumber(entry.amountGrams)} g • ${formatNumber(entry.calculatedCalories)} kcal"
+                )
             )
         }
     }
@@ -52,4 +55,7 @@ class SummaryActivity : AppCompatActivity() {
             setTextColor(getColor(R.color.app_text))
             setPadding(0, 12, 0, 12)
         }
+
+    private fun formatNumber(value: Double): String =
+        if (value % 1.0 == 0.0) value.toInt().toString() else String.format(Locale.getDefault(), "%.1f", value)
 }

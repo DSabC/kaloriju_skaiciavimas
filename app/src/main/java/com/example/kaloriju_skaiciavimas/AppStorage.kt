@@ -26,6 +26,7 @@ object AppStorage {
         for (i in 0 until jsonArray.length()) {
             val obj = jsonArray.getJSONObject(i)
             users.add(User(
+                userId = obj.optInt("user_id", obj.getString(JSON_EMAIL).hashCode()),
                 name = obj.getString(JSON_NAME),
                 email = obj.getString(JSON_EMAIL),
                 password = obj.getString(JSON_PASSWORD),
@@ -39,6 +40,7 @@ object AppStorage {
         val jsonArray = JSONArray()
         users.forEach { user ->
             jsonArray.put(JSONObject()
+                .put("user_id", user.userId)
                 .put(JSON_NAME, user.name)
                 .put(JSON_EMAIL, user.email)
                 .put(JSON_PASSWORD, user.password)
@@ -112,10 +114,41 @@ object AppStorage {
         return "food_entries_$email"
     }
 
+    private fun getProductsKey(context: Context): String {
+        val email = prefs(context).getString(KEY_CURRENT_EMAIL, "global") ?: "global"
+        return "products_$email"
+    }
+
     fun addFoodEntry(context: Context, entry: FoodEntry) {
         val entries = getFoodEntries(context).toMutableList()
         entries.add(entry)
         saveFoodEntries(context, entries)
+    }
+
+    fun saveProduct(context: Context, product: Product) {
+        val products = getProducts(context).toMutableList()
+        products.removeAll { it.name.equals(product.name, ignoreCase = true) }
+        products.add(product)
+        saveProducts(context, products.sortedBy { it.name.lowercase() })
+    }
+
+    fun getProducts(context: Context): List<Product> {
+        val rawJson = prefs(context).getString(getProductsKey(context), "[]") ?: "[]"
+        val jsonArray = JSONArray(rawJson)
+        val products = mutableListOf<Product>()
+
+        for (index in 0 until jsonArray.length()) {
+            val item = jsonArray.getJSONObject(index)
+            products.add(
+                Product(
+                    productId = item.optInt("product_id", item.getString("name").hashCode()),
+                    name = item.getString("name"),
+                    caloriesPer100g = item.getDouble("calories_per_100g")
+                )
+            )
+        }
+
+        return products
     }
 
     fun getFoodEntries(context: Context): List<FoodEntry> {
@@ -128,9 +161,21 @@ object AppStorage {
             val item = jsonArray.getJSONObject(index)
             entries.add(
                 FoodEntry(
+                    entryId = item.optInt("entry_id", index + 1),
                     name = item.getString("name"),
-                    calories = item.getInt("calories"),
-                    amount = item.getString("amount")
+                    caloriesPer100g = item.optDouble(
+                        "calories_per_100g",
+                        item.optDouble("calories", 0.0)
+                    ),
+                    amountGrams = item.optDouble(
+                        "amount_grams",
+                        item.optString("amount", "100").toDoubleOrNull() ?: 100.0
+                    ),
+                    calculatedCalories = item.optDouble(
+                        "calculated_calories",
+                        item.optDouble("calories", 0.0)
+                    ),
+                    date = item.optString("date", "")
                 )
             )
         }
@@ -147,11 +192,27 @@ object AppStorage {
         entries.forEach { entry ->
             jsonArray.put(
                 JSONObject()
+                    .put("entry_id", entry.entryId)
                     .put("name", entry.name)
-                    .put("calories", entry.calories)
-                    .put("amount", entry.amount)
+                    .put("calories_per_100g", entry.caloriesPer100g)
+                    .put("amount_grams", entry.amountGrams)
+                    .put("calculated_calories", entry.calculatedCalories)
+                    .put("date", entry.date)
             )
         }
         prefs(context).edit().putString(key, jsonArray.toString()).apply()
+    }
+
+    private fun saveProducts(context: Context, products: List<Product>) {
+        val jsonArray = JSONArray()
+        products.forEach { product ->
+            jsonArray.put(
+                JSONObject()
+                    .put("product_id", product.productId)
+                    .put("name", product.name)
+                    .put("calories_per_100g", product.caloriesPer100g)
+            )
+        }
+        prefs(context).edit().putString(getProductsKey(context), jsonArray.toString()).apply()
     }
 }
