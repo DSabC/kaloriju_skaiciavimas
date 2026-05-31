@@ -16,7 +16,6 @@ class LoginActivity : AppCompatActivity() {
             openMainScreen()
             return
         }
-
         setContentView(R.layout.activity_login)
 
         val emailInput = findViewById<EditText>(R.id.emailInput)

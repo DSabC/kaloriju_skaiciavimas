@@ -29,6 +29,11 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (AppStorage.userExists(this, email)) {
+                Toast.makeText(this, "Vartotojas su tokiu el. paštu jau egzistuoja", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             AppStorage.saveUser(this, User(name = name, email = email, password = password))
             startActivity(Intent(this, MainActivity::class.java))
             finish()
